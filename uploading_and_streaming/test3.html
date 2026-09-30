@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>Document</title>
+	</head>
+	<body>
+		<h1>hello</h1>
+		<!-- <button onclick="onSeeking()">hello world</button> -->
+		<video
+			id="video"
+			controls
+			muted
+			type="video/mp4"
+			src=`${process.env.REACT_APP_BACKEND}/stream/get-video`
+		></video>
+		<form
+			method="post"
+			enctype="multipart/form-data"
+			action=`${process.env.REACT_APP_BACKEND}/upload/upload-video`
+		>
+			<input
+				type="file"
+				name="video"
+				id=""
+			/>
+			<button type="submit">upload</button>
+		</form>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<script></script>
+	</body>
+</html>

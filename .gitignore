@@ -1,0 +1,15 @@
+/backend
+/filmfolio-backend
+/filmfolio-backend/*
+
+/frontend/node_modules
+/frontend/README.md
+/frontend/src/store
+/frontend/.gitignore
+node_modules
+package-lock.json
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*

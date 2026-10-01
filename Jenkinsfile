@@ -50,38 +50,60 @@ pipeline {
 }
 
         stage('Deploy EC2 #1') {
-            steps {
-                sshagent([env.SSH_CREDENTIALS]) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} '
-                            set -e
-                            cd ${APP_DIR}
-                            git pull origin main
-                            docker compose build
-                            docker compose up -d
-                            docker compose ps
-                        '
-                    '''
-                }
-            }
-        }
+    steps {
+        sshagent([env.SSH_CREDENTIALS]) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} '
+                    set -e
 
-        stage('Deploy EC2 #2') {
-            steps {
-                sshagent([env.SSH_CREDENTIALS]) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} '
-                            set -e
-                            cd ${APP_DIR}
-                            git pull origin main
-                            docker compose build
-                            docker compose up -d
-                            docker compose ps
-                        '
-                    '''
-                }
-            }
+                    if [ ! -d "${APP_DIR}/.git" ]; then
+                        echo "First deployment: cloning repository..."
+                        sudo rm -rf ${APP_DIR}
+                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git ${APP_DIR}
+                        sudo chown -R ubuntu:ubuntu ${APP_DIR}
+                    else
+                        echo "Existing deployment: pulling latest changes..."
+                        cd ${APP_DIR}
+                        git pull origin main
+                    fi
+
+                    cd ${APP_DIR}
+                    docker compose build
+                    docker compose up -d
+                    docker compose ps
+                '
+            '''
         }
+    }
+}
+
+       stage('Deploy EC2 #2') {
+    steps {
+        sshagent([env.SSH_CREDENTIALS]) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} '
+                    set -e
+
+                    if [ ! -d "${APP_DIR}/.git" ]; then
+                        echo "First deployment: cloning repository..."
+                        sudo rm -rf ${APP_DIR}
+                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git ${APP_DIR}
+                        sudo chown -R ubuntu:ubuntu ${APP_DIR}
+                    else
+                        echo "Existing deployment: pulling latest changes..."
+                        cd ${APP_DIR}
+                        git pull origin main
+                    fi
+
+                    cd ${APP_DIR}
+                    docker compose build
+                    docker compose up -d
+                    docker compose ps
+                '
+            '''
+        }
+    }
+}
 
         stage('Deployment Verification') {
             steps {

@@ -25,6 +25,28 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+
+// Application health check for AWS ALB and CI/CD
+app.get('/health', (req, res) => {
+    const databaseConnected = mongoose.connection.readyState === 1;
+
+    if (databaseConnected) {
+        return res.status(200).json({
+            status: 'healthy',
+            application: 'Filmfolio',
+            database: 'connected'
+        });
+    }
+
+    return res.status(503).json({
+        status: 'unhealthy',
+        application: 'Filmfolio',
+        database: 'disconnected'
+    });
+});
+
+
+
 app.set('trust proxy', 1); // trust first proxy
 app.use(express.json());
 app.use(express.urlencoded());

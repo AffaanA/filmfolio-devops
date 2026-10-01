@@ -212,13 +212,87 @@ pipeline {
                     sh '''
                         set -e
 
-                        echo "Checking EC2 #1..."
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} \
-                            "docker compose -f ${APP_DIR}/docker-compose.yml ps"
+                        verify_instance() {
+                            host="$1"
+                            echo "=== Verifying ${host} ==="
 
-                        echo "Checking EC2 #2..."
-                        ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} \
-                            "docker compose -f ${APP_DIR}/docker-compose.yml ps"
+                            ssh -o StrictHostKeyChecking=no "ubuntu@${host}" 'bash -s' <<'REMOTE'
+set -e
+
+check_http() {
+    name="$1"
+    url="$2"
+    attempt=1
+
+    while [ "$attempt" -le 12 ]; do
+        status=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --max-time 5 "$url" || true)
+
+        if [ "$status" = "200" ]; then
+            echo "PASS: $name returned HTTP 200"
+            return 0
+        fi
+
+        echo "Attempt $attempt: $name returned HTTP ${status:-no response}"
+        attempt=$((attempt + 1))
+        sleep 5
+    done
+
+    echo "FAIL: $name did not return HTTP 200"
+    exit 1
+}
+
+check_http "Frontend" "http://127.0.0.1:3000/"
+check_http "Backend health and database" "http://127.0.0.1:5000/health"
+REMOTE
+                        }
+
+                        verify_instance "$EC2_1"
+                        verify_instance "$EC2_2"
+
+                        echo "=== Verifying ALB target health ==="
+
+                        TARGET_GROUPS="
+arn:aws:elasticloadbalancing:us-east-1:357542025325:targetgroup/filmfolio-frontend-tg/6773d7421a44a3d4
+arn:aws:elasticloadbalancing:us-east-1:357542025325:targetgroup/filmfolio-backend-tg/b7f54c8a2f689df5
+"
+
+                        for tg in $TARGET_GROUPS; do
+                            echo "Checking $tg"
+                            attempt=1
+
+                            while [ "$attempt" -le 12 ]; do
+                                total=$(aws elbv2 describe-target-health \
+                                    --region us-east-1 \
+                                    --target-group-arn "$tg" \
+                                    --query 'length(TargetHealthDescriptions)' \
+                                    --output text \
+                                    --no-cli-pager)
+
+                                healthy=$(aws elbv2 describe-target-health \
+                                    --region us-east-1 \
+                                    --target-group-arn "$tg" \
+                                    --query 'length(TargetHealthDescriptions[?TargetHealth.State==`healthy`])' \
+                                    --output text \
+                                    --no-cli-pager)
+
+                                if [ "$total" = "2" ] && [ "$healthy" = "2" ]; then
+                                    echo "PASS: Both targets are healthy"
+                                    break
+                                fi
+
+                                echo "Attempt $attempt: healthy=$healthy, total=$total"
+                                attempt=$((attempt + 1))
+                                sleep 10
+                            done
+
+                            if [ "$total" != "2" ] || [ "$healthy" != "2" ]; then
+                                echo "FAIL: Targets are not all healthy: $tg"
+                                exit 1
+                            fi
+                        done
+
+                        echo "All application and ALB health checks passed."
                     '''
                 }
             }

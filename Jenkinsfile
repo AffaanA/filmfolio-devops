@@ -31,7 +31,8 @@ pipeline {
         dir('frontend') {
             sh '''
                 echo "Installing frontend dependencies..."
-                npm install
+                npm install --legacy-peer-deps
+                npm install eslint@8 --save-dev --legacy-peer-deps
             '''
         }
     }

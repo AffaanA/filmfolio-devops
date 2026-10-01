@@ -53,25 +53,25 @@ pipeline {
     steps {
         sshagent([env.SSH_CREDENTIALS]) {
             sh '''
-                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} '
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} "
                     set -e
 
-                    if [ ! -d "${APP_DIR}/.git" ]; then
-                        echo "First deployment: cloning repository..."
-                        sudo rm -rf ${APP_DIR}
-                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git ${APP_DIR}
-                        sudo chown -R ubuntu:ubuntu ${APP_DIR}
+                    if [ ! -d /opt/filmfolio/.git ]; then
+                        echo 'First deployment: cloning repository...'
+                        sudo rm -rf /opt/filmfolio
+                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git /opt/filmfolio
+                        sudo chown -R ubuntu:ubuntu /opt/filmfolio
                     else
-                        echo "Existing deployment: pulling latest changes..."
-                        cd ${APP_DIR}
+                        echo 'Existing deployment: pulling latest changes...'
+                        cd /opt/filmfolio
                         git pull origin main
                     fi
 
-                    cd ${APP_DIR}
+                    cd /opt/filmfolio
                     docker compose build
                     docker compose up -d
                     docker compose ps
-                '
+                "
             '''
         }
     }
@@ -81,25 +81,25 @@ pipeline {
     steps {
         sshagent([env.SSH_CREDENTIALS]) {
             sh '''
-                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} '
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} "
                     set -e
 
-                    if [ ! -d "${APP_DIR}/.git" ]; then
-                        echo "First deployment: cloning repository..."
-                        sudo rm -rf ${APP_DIR}
-                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git ${APP_DIR}
-                        sudo chown -R ubuntu:ubuntu ${APP_DIR}
+                    if [ ! -d /opt/filmfolio/.git ]; then
+                        echo 'First deployment: cloning repository...'
+                        sudo rm -rf /opt/filmfolio
+                        sudo git clone https://github.com/AffaanA/filmfolio-devops.git /opt/filmfolio
+                        sudo chown -R ubuntu:ubuntu /opt/filmfolio
                     else
-                        echo "Existing deployment: pulling latest changes..."
-                        cd ${APP_DIR}
+                        echo 'Existing deployment: pulling latest changes...'
+                        cd /opt/filmfolio
                         git pull origin main
                     fi
 
-                    cd ${APP_DIR}
+                    cd /opt/filmfolio
                     docker compose build
                     docker compose up -d
                     docker compose ps
-                '
+                "
             '''
         }
     }

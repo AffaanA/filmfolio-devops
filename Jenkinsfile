@@ -89,6 +89,13 @@ stage('Install Docker Compose') {
 
                     cd /opt/filmfolio
                     docker compose build
+                    if [ ! -f /swapfile ]; then
+  sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+fi
+free -h
                     docker compose up -d
                     docker compose ps
                 "
@@ -118,6 +125,13 @@ git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio
+                    if [ ! -f /swapfile ]; then
+  sudo fallocate -l 2G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+fi
+free -h
                     docker compose build
                     docker compose up -d
                     docker compose ps

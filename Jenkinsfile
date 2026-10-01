@@ -49,6 +49,25 @@ pipeline {
     }
 }
 
+stage('Install Docker Compose') {
+    steps {
+        sshagent([env.SSH_CREDENTIALS]) {
+            sh '''
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_1} "
+                    sudo apt-get update
+                    sudo apt-get install -y docker-compose-v2
+                    docker compose version
+                "
+
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_2} "
+                    sudo apt-get update
+                    sudo apt-get install -y docker-compose-v2
+                    docker compose version
+                "
+            '''
+        }
+    }
+}
         stage('Deploy EC2 #1') {
     steps {
         sshagent([env.SSH_CREDENTIALS]) {
@@ -93,7 +112,8 @@ pipeline {
                     else
                         echo 'Existing deployment: pulling latest changes...'
                         cd /opt/filmfolio
-                        git pull origin main
+                        git fetch origin main
+    git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio

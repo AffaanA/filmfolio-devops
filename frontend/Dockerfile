@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --legacy-peer-deps
-COPY . .
+RUN npm install --legacy-peer-deps \
+    && npm install ajv@8 --no-save --legacy-peer-depsCOPY . .
 
 ARG REACT_APP_BACKEND
 ENV REACT_APP_BACKEND=$REACT_APP_BACKEND

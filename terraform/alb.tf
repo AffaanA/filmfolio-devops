@@ -63,7 +63,7 @@ resource "aws_lb_target_group" "backend" {
 
   health_check {
     enabled  = true
-    path     = "/"
+    path     = "/health"
     protocol = "HTTP"
     port     = "5000"
 

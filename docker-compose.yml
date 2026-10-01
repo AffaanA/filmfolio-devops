@@ -29,7 +29,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_BACKEND: http://localhost:5000
+        REACT_APP_BACKEND: http://filmfolio-alb-528135209.us-east-1.elb.amazonaws.com
     container_name: filmfolio-frontend
     restart: unless-stopped
     ports:

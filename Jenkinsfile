@@ -19,24 +19,23 @@ pipeline {
         }
 
         stage('Backend Dependencies') {
-            steps {
-                sh '''
-                    echo "Installing backend dependencies..."
-                    npm ci --legacy-peer-deps
-                '''
-            }
-        }
-
+    steps {
+        sh '''
+            echo "Installing backend dependencies..."
+            npm install --legacy-peer-deps
+        '''
+    }
+}
         stage('Frontend Dependencies') {
-            steps {
-                dir('frontend') {
-                    sh '''
-                        echo "Installing frontend dependencies..."
-                        npm ci
-                    '''
-                }
-            }
+    steps {
+        dir('frontend') {
+            sh '''
+                echo "Installing frontend dependencies..."
+                npm install
+            '''
         }
+    }
+}
 
         stage('Frontend Build') {
             steps {

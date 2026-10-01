@@ -68,7 +68,8 @@ stage('Install Docker Compose') {
         }
     }
 }
-        stage('Deploy EC2 #1') {
+        ```groovy
+stage('Deploy EC2 #1') {
     steps {
         sshagent([env.SSH_CREDENTIALS]) {
             sh '''
@@ -83,28 +84,44 @@ stage('Install Docker Compose') {
                     else
                         echo 'Existing deployment: pulling latest changes...'
                         cd /opt/filmfolio
-                         git fetch origin main
-    git reset --hard origin/main
+                        git fetch origin main
+                        git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio
-                    docker compose build
+
+                    echo 'Checking and enabling swap...'
+
                     if [ ! -f /swapfile ]; then
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-fi
-free -h
+                        sudo fallocate -l 2G /swapfile
+                        sudo chmod 600 /swapfile
+                        sudo mkswap /swapfile
+                    fi
+
+                    if ! sudo swapon --show | grep -q '/swapfile'; then
+                        sudo swapon /swapfile
+                    fi
+
+                    free -h
+
+                    echo 'Building Docker images...'
+                    docker compose build
+
+                    echo 'Starting application containers...'
                     docker compose up -d
+
+                    echo 'Checking container status...'
                     docker compose ps
                 "
             '''
         }
     }
 }
+```
 
-       stage('Deploy EC2 #2') {
+
+       ```groovy
+stage('Deploy EC2 #2') {
     steps {
         sshagent([env.SSH_CREDENTIALS]) {
             sh '''
@@ -118,28 +135,43 @@ free -h
                         sudo chown -R ubuntu:ubuntu /opt/filmfolio
                     else
                         echo 'Existing deployment: pulling latest changes...'
-                      cd /opt/filmfolio
-sudo chown -R ubuntu:ubuntu /opt/filmfolio
-git fetch origin main
-git reset --hard origin/main
+                        cd /opt/filmfolio
+                        sudo chown -R ubuntu:ubuntu /opt/filmfolio
+                        git fetch origin main
+                        git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio
+
+                    echo 'Checking and enabling swap...'
+
                     if [ ! -f /swapfile ]; then
-  sudo fallocate -l 2G /swapfile
-  sudo chmod 600 /swapfile
-  sudo mkswap /swapfile
-  sudo swapon /swapfile
-fi
-free -h
+                        sudo fallocate -l 2G /swapfile
+                        sudo chmod 600 /swapfile
+                        sudo mkswap /swapfile
+                    fi
+
+                    if ! sudo swapon --show | grep -q '/swapfile'; then
+                        sudo swapon /swapfile
+                    fi
+
+                    free -h
+
+                    echo 'Building Docker images...'
                     docker compose build
+
+                    echo 'Starting application containers...'
                     docker compose up -d
+
+                    echo 'Checking container status...'
                     docker compose ps
                 "
             '''
         }
     }
 }
+```
+
 
         stage('Deployment Verification') {
             steps {

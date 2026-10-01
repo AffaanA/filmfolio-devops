@@ -39,15 +39,15 @@ pipeline {
 }
 
         stage('Frontend Build') {
-            steps {
-                dir('frontend') {
-                    sh '''
-                        echo "Building frontend..."
-                        NODE_OPTIONS=--max-old-space-size=768 npm run build
-                    '''
-                }
-            }
+    steps {
+        dir('frontend') {
+            sh '''
+                echo "Building frontend..."
+                CI=false NODE_OPTIONS=--max-old-space-size=768 npm run build
+            '''
         }
+    }
+}
 
         stage('Deploy EC2 #1') {
             steps {

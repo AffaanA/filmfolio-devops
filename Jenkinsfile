@@ -111,9 +111,10 @@ stage('Install Docker Compose') {
                         sudo chown -R ubuntu:ubuntu /opt/filmfolio
                     else
                         echo 'Existing deployment: pulling latest changes...'
-                        cd /opt/filmfolio
-                        git fetch origin main
-    git reset --hard origin/main
+                      cd /opt/filmfolio
+sudo chown -R ubuntu:ubuntu /opt/filmfolio
+git fetch origin main
+git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio

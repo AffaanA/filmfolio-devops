@@ -64,7 +64,8 @@ pipeline {
                     else
                         echo 'Existing deployment: pulling latest changes...'
                         cd /opt/filmfolio
-                        git pull origin main
+                         git fetch origin main
+    git reset --hard origin/main
                     fi
 
                     cd /opt/filmfolio

@@ -192,11 +192,10 @@ docker compose up -d --force-recreate frontend
                                 free -h
 
                                 echo "Building Docker images..."
-                                docker compose build
+docker compose build --no-cache frontend
 
                                 echo "Starting application..."
-                                docker compose up -d
-
+docker compose up -d --force-recreate frontend
                                 docker compose ps
                             '"'"''
                         '''

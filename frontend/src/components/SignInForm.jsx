@@ -38,10 +38,16 @@ export default function SignInForm({ isLogged, setIsLogged }) {
 					});
 					setIsLoading(false);
 				})
-				.catch((res) => {
-					setvalerror(res.response.data);
-					setIsLoading(false);
-				});
+				
+.catch((error) => {
+    const message =
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        'Login failed. Please try again.';
+
+    setvalerror(message);
+    setIsLoading(false);
+});
 		}
 	};
 	// const [name, setName] = useState("");

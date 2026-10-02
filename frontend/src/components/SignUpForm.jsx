@@ -33,10 +33,16 @@ export default function SignUpForm() {
 					Navigate('/sign-in');
 					setIsLoading(false);
 				})
-				.catch((res) => {
-					setvalerror(res.response.data);
-					setIsLoading(false);
-				});
+				
+.catch((error) => {
+    const message =
+        error.response?.data?.msg ||
+        error.response?.data?.message ||
+        'Signup failed. Please try again.';
+
+    setvalerror(message);
+    setIsLoading(false);
+});
 		}
 	};
 	const handleChangeAgree = () => {

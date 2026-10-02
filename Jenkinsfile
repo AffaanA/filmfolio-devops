@@ -102,6 +102,7 @@ pipeline {
                                 else
                                     echo "Updating repository..."
                                     cd /opt/filmfolio
+                                    sudo chown -R ubuntu:ubuntu frontend/build 2>/dev/null || true
                                     git fetch origin main
                                     git reset --hard origin/main
                                 fi
